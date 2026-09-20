@@ -62,7 +62,10 @@ test('GitHub Actions ロールの信頼ポリシーが cateiru 配下の全リ�
               'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
             },
             StringLike: {
-              'token.actions.githubusercontent.com:sub': 'repo:cateiru/*',
+              'token.actions.githubusercontent.com:sub': [
+                'repo:cateiru/*',
+                'repo:cateiru@24271196/*',
+              ],
             },
           },
         },

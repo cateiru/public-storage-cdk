@@ -8,6 +8,10 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 
 const DOMAIN_NAME = 'storage.cateiru.dev';
 const GITHUB_OWNER = 'cateiru';
+// GitHub側で immutable subject claims (`use_immutable_subject: true`) が有効な場合、
+// OIDCトークンの sub は `repo:<owner>@<owner_id>/<repo>@<repo_id>:...` の形式になる。
+// `gh api repos/<owner>/<repo>/actions/oidc/customization/sub` で確認したこのアカウントの owner_id。
+const GITHUB_OWNER_ID = '24271196';
 
 export class PublicStorageCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -63,7 +67,12 @@ export class PublicStorageCdkStack extends cdk.Stack {
             'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
           },
           StringLike: {
-            'token.actions.githubusercontent.com:sub': `repo:${GITHUB_OWNER}/*`,
+            // immutable subject claimsが無効(従来形式)/有効(owner_id/repo_id付き)の
+            // どちらでもマッチするよう両方のパターンを許可する。
+            'token.actions.githubusercontent.com:sub': [
+              `repo:${GITHUB_OWNER}/*`,
+              `repo:${GITHUB_OWNER}@${GITHUB_OWNER_ID}/*`,
+            ],
           },
         },
       ),
