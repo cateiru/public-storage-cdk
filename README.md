@@ -8,6 +8,7 @@ AWS CDK (TypeScript) で管理する、パブリック公開用のファイル�
   - ファイルの実体を格納します。
   - バケット自体はパブリックアクセスをすべてブロックしており、CloudFront (Origin Access Control) 経由でのみ読み取りを許可します。
   - 誤削除防止のため、削除ポリシーは `RETAIN` にしています。
+  - オブジェクトに `auto-expire=true` タグを付けてアップロードすると、180日後に自動削除されます。タグを付けなければ（`index.html`など）自動削除の対象にはなりません。
 - **CloudFront Distribution**
   - `storage.cateiru.dev` を代替ドメイン名 (CNAME) として設定し、S3バケットをオリジンとして配信します。
   - 認証は設けていないため、誰でもアクセスできます。

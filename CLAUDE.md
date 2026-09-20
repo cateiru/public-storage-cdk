@@ -31,6 +31,7 @@ CI (`.github/workflows/ci.yml`) は `pnpm install --frozen-lockfile` → `pnpm r
 1. **S3 バケット** (`cateiru-public-storage`)
    - `BlockPublicAccess.BLOCK_ALL` で直接公開はブロックし、CloudFront (Origin Access Control) 経由のみ読み取りを許可。
    - `removalPolicy: RETAIN`（実データ保持のため誤削除防止）。
+   - ライフサイクルルール: `auto-expire=true` タグが付いたオブジェクトは180日 (`AUTO_EXPIRE_AFTER_DAYS`) で自動削除される。S3のライフサイクルルールは「特定のタグが無いオブジェクト」を条件にできないため、`index.html`など残したいオブジェクトには何もタグを付けない（＝タグが無いオブジェクトは自動では削除されない）。削除したいオブジェクトはアップロード時に明示的に `auto-expire=true` タグを付ける必要がある。
 2. **ACM 証明書** (`storage.cateiru.dev` 用、DNS 検証)
    - Hosted Zone はこのスタックで管理しない。DNS はスタック利用者側で別途管理する前提のため、検証用 CNAME はデプロイ時に手動で追加する運用（詳細は README のデプロイ手順を参照）。
 3. **CloudFront Distribution**

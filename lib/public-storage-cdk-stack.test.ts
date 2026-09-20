@@ -28,6 +28,22 @@ test('S3 バケットが Public Access Block 有効かつ RETAIN で作成され
   });
 });
 
+test('S3 バケットに auto-expire タグ付きオブジェクトを180日で削除するライフサイクルルールがある', () => {
+  const template = synthTemplate();
+
+  template.hasResourceProperties('AWS::S3::Bucket', {
+    LifecycleConfiguration: {
+      Rules: [
+        {
+          Status: 'Enabled',
+          ExpirationInDays: 180,
+          TagFilters: [{ Key: 'auto-expire', Value: 'true' }],
+        },
+      ],
+    },
+  });
+});
+
 test('storage.cateiru.dev 向けの ACM 証明書 (DNS 検証) が us-east-1 に作られる', () => {
   const template = synthTemplate();
 

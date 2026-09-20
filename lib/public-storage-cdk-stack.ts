@@ -13,6 +13,12 @@ const GITHUB_OWNER = 'cateiru';
 // `gh api repos/<owner>/<repo>/actions/oidc/customization/sub` で確認したこのアカウントの owner_id。
 const GITHUB_OWNER_ID = '24271196';
 
+// S3のライフサイクルルールは「タグが無いオブジェクトを対象にする」条件を作れないため、
+// 自動削除したいオブジェクト側にこのタグを付ける運用にする(付けなければ index.html 含め永続保持される)。
+const AUTO_EXPIRE_TAG_KEY = 'auto-expire';
+const AUTO_EXPIRE_TAG_VALUE = 'true';
+const AUTO_EXPIRE_AFTER_DAYS = 180;
+
 export class PublicStorageCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -25,6 +31,16 @@ export class PublicStorageCdkStack extends cdk.Stack {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       encryption: s3.BucketEncryption.S3_MANAGED,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+      lifecycleRules: [
+        {
+          id: 'ExpireTaggedObjects',
+          enabled: true,
+          tagFilters: {
+            [AUTO_EXPIRE_TAG_KEY]: AUTO_EXPIRE_TAG_VALUE,
+          },
+          expiration: cdk.Duration.days(AUTO_EXPIRE_AFTER_DAYS),
+        },
+      ],
     });
 
     // --- ACM: CloudFront にアタッチする証明書 (us-east-1 必須) ---
