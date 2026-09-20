@@ -26,19 +26,19 @@ AWS CDK (TypeScript) で管理する、パブリック公開用のファイル�
 0. AWS認証情報を設定し（`aws configure` や環境変数など）、対象アカウントの `us-east-1` をまだCDK Bootstrapしていない場合は実行します。
 
    ```bash
-   npx cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
+   pnpm exec cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
    ```
 
 1. 依存関係をインストールします。
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 2. 初回デプロイを実行します。
 
    ```bash
-   npx cdk deploy
+   pnpm exec cdk deploy
    ```
 
    ACM証明書がDNS検証待ちのため、デプロイは `CREATE_IN_PROGRESS` のまま止まります。
@@ -96,10 +96,10 @@ steps:
 
 ## Useful commands
 
-- `npm run build` : 型チェック
-- `npm run watch` : ファイル変更を監視して型チェック
-- `npm run test` : Vitestによるユニットテスト実行
-- `npm run test:watch` : Vitestをウォッチモードで実行
-- `npx cdk synth` : CloudFormationテンプレートを生成
-- `npx cdk diff` : デプロイ済みスタックとの差分表示
-- `npx cdk deploy` : スタックをデプロイ
+- `pnpm run build` : 型チェック
+- `pnpm run watch` : ファイル変更を監視して型チェック
+- `pnpm test` : Vitestによるユニットテスト実行
+- `pnpm run test:watch` : Vitestをウォッチモードで実行
+- `pnpm exec cdk synth` : CloudFormationテンプレートを生成
+- `pnpm exec cdk diff` : デプロイ済みスタックとの差分表示
+- `pnpm exec cdk deploy` : スタックをデプロイ
