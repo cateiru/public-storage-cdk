@@ -78,6 +78,8 @@ const githubOidcProvider = iam.OpenIdConnectProvider.fromOpenIdConnectProviderAr
 
 ## GitHub Actions側の設定例
 
+`.github/workflows/deploy.yml` に、`main` へのpush時に `public/` ディレクトリの中身をS3に同期し、CloudFrontのキャッシュを無効化するワークフローを実装済みです。
+
 ```yaml
 permissions:
   id-token: write
@@ -88,11 +90,13 @@ steps:
     with:
       role-to-assume: <GitHubActionsRoleArn の出力値>
       aws-region: us-east-1
-  - run: aws s3 sync ./dist s3://cateiru-public-storage/
+  - run: aws s3 sync ./public s3://cateiru-public-storage/ --delete
   - run: aws cloudfront create-invalidation --distribution-id <DistributionId の出力値> --paths "/*"
 ```
 
 `cloudfront:CreateInvalidation` を許可しているのは、デフォルトのキャッシュポリシーが `CACHING_OPTIMIZED` であるため、アップロード後にキャッシュを無効化しないと更新内容がTTLが切れるまで反映されないためです。
+
+`role-to-assume` と `--distribution-id` は、このスタックが単一アカウント・単一環境向けの個人インフラであるため、`.github/workflows/deploy.yml` 内に実際の値を直接ハードコードしています。再デプロイ等でDistribution IDが変わった場合は、このファイルの値も更新してください。
 
 ## Useful commands
 

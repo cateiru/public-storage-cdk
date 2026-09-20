@@ -44,6 +44,12 @@ CI (`.github/workflows/ci.yml`) は `pnpm install --frozen-lockfile` → `pnpm r
 
 `DOMAIN_NAME` と `GITHUB_OWNER` はスタック先頭の定数で定義されており、対象ドメインやリポジトリオーナーを変える場合はここを変更する。
 
+## 公開コンテンツと自動デプロイ
+
+`public/` ディレクトリの中身がS3バケット (`cateiru-public-storage`) にそのまま同期され、`storage.cateiru.dev` として公開される。ファイルを追加・変更する場合はこのディレクトリを編集する。
+
+`.github/workflows/deploy.yml` が `main` へのpush毎に実行され、GitHub Actions用 OIDC ロールを使って `aws s3 sync ./public s3://cateiru-public-storage/ --delete` → `aws cloudfront create-invalidation` を行う。ロールARNとCloudFront Distribution IDは単一アカウント・単一環境向けの個人インフラであるため、このワークフローファイルに直接ハードコードしている。再デプロイ等でDistribution IDが変わった場合はこのファイルの値も更新が必要。
+
 ## テスト方針
 
 `lib/public-storage-cdk-stack.test.ts` は `Template.fromStack()` で synth した CloudFormation テンプレートに対して `aws-cdk-lib/assertions` の `Template` API でリソースプロパティを検証するスタイル。新しいリソースやプロパティを追加した場合は、同様のパターンでテストを追加する。
