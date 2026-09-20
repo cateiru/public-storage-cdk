@@ -50,6 +50,8 @@ CI (`.github/workflows/ci.yml`) は `pnpm install --frozen-lockfile` → `pnpm r
 
 `.github/workflows/deploy.yml` が `main` へのpush毎に実行され、GitHub Actions用 OIDC ロールを使って `aws s3 sync ./public s3://cateiru-public-storage/ --delete` → `aws cloudfront create-invalidation` を行う。ロールARNとCloudFront Distribution IDは単一アカウント・単一環境向けの個人インフラであるため、このワークフローファイルに直接ハードコードしている。再デプロイ等でDistribution IDが変わった場合はこのファイルの値も更新が必要。
 
+**注意**: `aws-actions/configure-aws-credentials@v4` はデフォルトでリポジトリ名等のセッションタグを付与して `AssumeRoleWithWebIdentity` を呼ぶが、CDKの `WebIdentityPrincipal` が生成する信頼ポリシーのActionは `sts:AssumeRoleWithWebIdentity` のみで `sts:TagSession` を許可していないため、そのままだと `Not authorized to perform sts:AssumeRoleWithWebIdentity` で失敗する（ログに `role session tags are being used.` と出るのが目印）。信頼ポリシーを変更してIAMを再デプロイする代わりに、ワークフロー側で `role-skip-session-tagging: true` を指定してセッションタグ付けを無効化して回避している。
+
 ## テスト方針
 
 `lib/public-storage-cdk-stack.test.ts` は `Template.fromStack()` で synth した CloudFormation テンプレートに対して `aws-cdk-lib/assertions` の `Template` API でリソースプロパティを検証するスタイル。新しいリソースやプロパティを追加した場合は、同様のパターンでテストを追加する。

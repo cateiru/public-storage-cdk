@@ -82,6 +82,7 @@ pnpm exec cdk deploy
 | ACMコンソールに証明書が見当たらない | コンソールのリージョンがus-east-1になっていない | リージョンをus-east-1に切り替える |
 | `StorageCertificate` が長時間 `CREATE_IN_PROGRESS` | DNS検証用CNAME未追加、または追加先を間違えている（`storage.cateiru.dev`本体に追加してしまった等） | ACMコンソール記載の正確な名前・値で、指定された別名（`_xxxx.storage.cateiru.dev`）にCNAMEを追加する |
 | `StorageDistribution` が長時間 `CREATE_IN_PROGRESS` | CloudFront Distribution作成は通常5〜20分かかる | エラーが出ていなければ待つ |
+| GitHub Actionsの`configure-aws-credentials`で `Could not assume role with OIDC: Not authorized to perform sts:AssumeRoleWithWebIdentity`（ログに `role session tags are being used.` あり） | `configure-aws-credentials@v4` がデフォルトで付与するセッションタグに対し、CDKが作る信頼ポリシーのActionが `sts:AssumeRoleWithWebIdentity` のみで `sts:TagSession` を許可していない | ワークフローの`configure-aws-credentials`ステップに `role-skip-session-tagging: true` を追加する（信頼ポリシー変更＋IAM再デプロイは不要） |
 
 ## 既に別スタックでOIDCプロバイダーが存在する場合
 
