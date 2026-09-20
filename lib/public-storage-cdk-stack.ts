@@ -44,6 +44,7 @@ export class PublicStorageCdkStack extends cdk.Stack {
       },
       domainNames: [DOMAIN_NAME],
       certificate,
+      defaultRootObject: 'index.html',
     });
 
     // --- GitHub Actions OIDC ---
