@@ -23,6 +23,9 @@ export class PublicStorageCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    // このスタックが管理する全リソースに、管理元がわかるタグを付与する。
+    cdk.Tags.of(this).add('managed-by', 'public-storage-cdk');
+
     // --- S3: ファイル格納用バケット ---
     // 誰でも閲覧できるようにするが、S3 への直接公開はせず CloudFront (OAC) 経由のみ許可する。
     // 実データを保持するため、誤って削除されないよう RETAIN にしておく。
