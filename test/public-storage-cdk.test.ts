@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import * as cdk from 'aws-cdk-lib/core';
 import { Template } from 'aws-cdk-lib/assertions';
 import { PublicStorageCdkStack } from '../lib/public-storage-cdk-stack';

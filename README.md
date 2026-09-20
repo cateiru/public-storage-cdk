@@ -98,7 +98,8 @@ steps:
 
 - `npm run build` : 型チェック
 - `npm run watch` : ファイル変更を監視して型チェック
-- `npm run test` : Jestによるユニットテスト実行
+- `npm run test` : Vitestによるユニットテスト実行
+- `npm run test:watch` : Vitestをウォッチモードで実行
 - `npx cdk synth` : CloudFormationテンプレートを生成
 - `npx cdk diff` : デプロイ済みスタックとの差分表示
 - `npx cdk deploy` : スタックをデプロイ
