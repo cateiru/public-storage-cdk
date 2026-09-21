@@ -49,7 +49,9 @@ CI (`.github/workflows/ci.yml`) は `pnpm install --frozen-lockfile` → `pnpm r
 
 `public/` ディレクトリの中身がS3バケット (`cateiru-public-storage`) にそのまま同期され、`storage.cateiru.dev` として公開される。ファイルを追加・変更する場合はこのディレクトリを編集する。
 
-`.github/workflows/deploy.yml` が `main` へのpush毎に実行され、GitHub Actions用 OIDC ロールを使って `aws s3 sync ./public s3://cateiru-public-storage/ --delete` → `aws cloudfront create-invalidation` を行う。ロールARNとCloudFront Distribution IDは単一アカウント・単一環境向けの個人インフラであるため、このワークフローファイルに直接ハードコードしている。再デプロイ等でDistribution IDが変わった場合はこのファイルの値も更新が必要。
+`.github/workflows/deploy.yml` が `main` へのpush毎に実行され、GitHub Actions用 OIDC ロールを使って `aws s3 sync ./public s3://cateiru-public-storage/` → `aws cloudfront create-invalidation` を行う。ロールARNとCloudFront Distribution IDは単一アカウント・単一環境向けの個人インフラであるため、このワークフローファイルに直接ハードコードしている。再デプロイ等でDistribution IDが変わった場合はこのファイルの値も更新が必要。
+
+**注意（`--delete` を付けない理由）**: `cateiru-public-storage` バケットは、このリポジトリの `public/` 以外に、他リポジトリ（`canshi`, `yomikiri-manga-database` など）のCIが同じ `github-actions-public-storage` ロール（`repo:cateiru/*` に対して発行）を使って直接書き込む共有バケットでもある。そのため `aws s3 sync` に `--delete` を付けると、このリポジトリと無関係な他リポジトリのオブジェクトまで、このリポジトリへのpush毎に全削除されてしまう（実際に一度事故が起きている）。`public/` からファイルを削除してもS3側には残り続けるため、意図的に消したい場合は手動で `aws s3 rm` するか、`auto-expire=true` タグを付けてライフサイクルルールに任せる。
 
 **注意（セッションタグ）**: `aws-actions/configure-aws-credentials@v4` はデフォルトでリポジトリ名等のセッションタグを付与して `AssumeRoleWithWebIdentity` を呼ぶが、CDKの `WebIdentityPrincipal` が生成する信頼ポリシーのActionは `sts:AssumeRoleWithWebIdentity` のみで `sts:TagSession` を許可していないため、そのままだと `Not authorized to perform sts:AssumeRoleWithWebIdentity` で失敗する（ログに `role session tags are being used.` と出るのが目印）。信頼ポリシーを変更してIAMを再デプロイする代わりに、ワークフロー側で `role-skip-session-tagging: true` を指定してセッションタグ付けを無効化して回避している。
 

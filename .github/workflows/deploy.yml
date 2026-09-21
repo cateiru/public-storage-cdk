@@ -23,8 +23,11 @@ jobs:
           aws-region: us-east-1
           role-skip-session-tagging: true
 
+      # このバケットは他リポジトリのCIも直接書き込む共有バケットのため、
+      # --delete を付けると public/ 以外に置かれたオブジェクトまで全消ししてしまう。
+      # 意図的に外している(public/ から消したファイルはS3には残るので手動削除が必要)。
       - name: Sync to S3
-        run: aws s3 sync ./public s3://cateiru-public-storage/ --delete
+        run: aws s3 sync ./public s3://cateiru-public-storage/
 
       - name: Invalidate CloudFront cache
         run: aws cloudfront create-invalidation --distribution-id EQG76YTTJCT7N --paths "/*"

@@ -91,9 +91,11 @@ steps:
     with:
       role-to-assume: <GitHubActionsRoleArn の出力値>
       aws-region: us-east-1
-  - run: aws s3 sync ./public s3://cateiru-public-storage/ --delete
+  - run: aws s3 sync ./public s3://cateiru-public-storage/
   - run: aws cloudfront create-invalidation --distribution-id <DistributionId の出力値> --paths "/*"
 ```
+
+`cateiru-public-storage` バケットは他リポジトリのCIも同じロールで直接書き込む共有バケットのため、`aws s3 sync` に `--delete` は付けていません。付けるとこのリポジトリの `public/` に無いオブジェクト(＝他リポジトリが書き込んだファイル)がpush毎に全削除されてしまいます。
 
 `cloudfront:CreateInvalidation` を許可しているのは、デフォルトのキャッシュポリシーが `CACHING_OPTIMIZED` であるため、アップロード後にキャッシュを無効化しないと更新内容がTTLが切れるまで反映されないためです。
 
