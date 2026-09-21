@@ -63,6 +63,37 @@ test('CloudFront Distribution が storage.cateiru.dev のエイリアスを持�
   });
 });
 
+test('CloudFront Distribution の全レスポンスに X-Robots-Tag: noindex が付与される', () => {
+  const template = synthTemplate();
+
+  template.hasResourceProperties('AWS::CloudFront::ResponseHeadersPolicy', {
+    ResponseHeadersPolicyConfig: {
+      CustomHeadersConfig: {
+        Items: [
+          {
+            Header: 'X-Robots-Tag',
+            Override: true,
+            Value: 'noindex',
+          },
+        ],
+      },
+    },
+  });
+
+  const responseHeadersPolicies = template.findResources(
+    'AWS::CloudFront::ResponseHeadersPolicy',
+  );
+  const responseHeadersPolicyLogicalId = Object.keys(responseHeadersPolicies)[0];
+
+  template.hasResourceProperties('AWS::CloudFront::Distribution', {
+    DistributionConfig: {
+      DefaultCacheBehavior: {
+        ResponseHeadersPolicyId: { Ref: responseHeadersPolicyLogicalId },
+      },
+    },
+  });
+});
+
 test('GitHub Actions ロールの信頼ポリシーが cateiru 配下の全リポジトリを許可する', () => {
   const template = synthTemplate();
 

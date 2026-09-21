@@ -54,12 +54,32 @@ export class PublicStorageCdkStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns(),
     });
 
+    // 配信する全コンテンツを検索エンジンにインデックスさせないため、
+    // 全レスポンスに X-Robots-Tag: noindex を付与する。
+    const noIndexResponseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(
+      this,
+      'NoIndexResponseHeadersPolicy',
+      {
+        responseHeadersPolicyName: 'public-storage-noindex',
+        customHeadersBehavior: {
+          customHeaders: [
+            {
+              header: 'X-Robots-Tag',
+              value: 'noindex',
+              override: true,
+            },
+          ],
+        },
+      },
+    );
+
     // --- CloudFront: storage.cateiru.dev で公開するディストリビューション ---
     const distribution = new cloudfront.Distribution(this, 'StorageDistribution', {
       defaultBehavior: {
         origin: origins.S3BucketOrigin.withOriginAccessControl(bucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        responseHeadersPolicy: noIndexResponseHeadersPolicy,
       },
       domainNames: [DOMAIN_NAME],
       certificate,
