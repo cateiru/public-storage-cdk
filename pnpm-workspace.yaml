@@ -2,3 +2,6 @@ allowBuilds:
   esbuild: true
 onlyBuiltDependencies:
   - esbuild
+
+# Renovate の minimumReleaseAge（3 days）と合わせる。単位は分
+minimumReleaseAge: 4320
